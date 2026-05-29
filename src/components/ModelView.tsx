@@ -14,7 +14,8 @@ interface ModelAgg {
   model: string;
   totalToken: number;
   requestCount: number;
-  hitRate: number;
+  inputHitToken: number;
+  inputMissToken: number;
 }
 
 interface Props {
@@ -28,21 +29,16 @@ export default function ModelView({ data }: Props) {
     if (existing) {
       existing.totalToken += item.totalToken;
       existing.requestCount += item.requestCount;
+      existing.inputHitToken += item.inputHitToken;
+      existing.inputMissToken += item.inputMissToken;
     } else {
       agg.set(item.model, {
         model: item.model,
         totalToken: item.totalToken,
         requestCount: item.requestCount,
-        hitRate: 0,
+        inputHitToken: item.inputHitToken,
+        inputMissToken: item.inputMissToken,
       });
-    }
-  }
-  // Calculate hit rate
-  for (const item of data) {
-    const a = agg.get(item.model)!;
-    const totalInput = item.inputHitToken + item.inputMissToken;
-    if (totalInput > 0) {
-      a.hitRate = (item.inputHitToken / totalInput) * 100;
     }
   }
 
@@ -50,11 +46,15 @@ export default function ModelView({ data }: Props) {
 
   return (
     <>
-      {models.map((m) => (
-        <Text key={m.model}>
-          {m.model.padEnd(14)} {formatTokens(m.totalToken).padStart(12)}   {String(m.requestCount).padStart(6)} req   {Math.round(m.hitRate)}% cache
-        </Text>
-      ))}
+      {models.map((m) => {
+        const totalInput = m.inputHitToken + m.inputMissToken;
+        const hitRate = totalInput > 0 ? (m.inputHitToken / totalInput) * 100 : 0;
+        return (
+          <Text key={m.model}>
+            {m.model.padEnd(14)} {formatTokens(m.totalToken).padStart(12)}   {String(m.requestCount).padStart(6)} req   {Math.round(hitRate)}% cache
+          </Text>
+        );
+      })}
     </>
   );
 }
