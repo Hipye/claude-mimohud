@@ -12,7 +12,7 @@ export function progressBar(used: number, limit: number, width = 10): string {
   const percent = limit > 0 ? (used / limit) * 100 : 0;
   const filled = Math.max(0, Math.min(Math.round((percent / 100) * width), width));
   const empty = width - filled;
-  return chalk.white("█".repeat(filled)) + chalk.green("█".repeat(empty));
+  return chalk.gray("█".repeat(filled)) + chalk.green("█".repeat(empty));
 }
 
 export function aggregateDailyByDate(data: DailyUsage[], topN = 10): [string, number][] {

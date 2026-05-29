@@ -55,7 +55,7 @@ export default function App({ cookie, refreshInterval, showDaily = false, showMo
             {isRefreshing && <Text dimColor> 刷新中...</Text>}
             {lastRefresh && !isRefreshing && <Text dimColor> {lastRefresh.toLocaleTimeString()}</Text>}
           </Text>
-          <HudLine usage={planUsage} detail={planDetail} />
+          <HudLine usage={planUsage} detail={planDetail} dailyUsage={dailyUsage} />
           {daily && <DailyView data={dailyUsage} />}
           {model && <ModelView data={dailyUsage} />}
         </>
