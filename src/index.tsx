@@ -2,7 +2,7 @@
 import React from "react";
 import { render } from "ink";
 import meow from "meow";
-import { loadConfig, saveConfig, getConfigPath } from "./config.js";
+import { loadConfig, getConfigPath } from "./config.js";
 import App from "./components/App.js";
 
 const cli = meow(
