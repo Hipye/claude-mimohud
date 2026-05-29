@@ -90,8 +90,13 @@ export async function fetchDailyUsage(
   year: number,
   month: number
 ): Promise<DailyUsage[]> {
+  // Extract api-platform_ph from cookie for query parameter
+  const phMatch = cookie.match(/api-platform_ph="?([^";]+)/);
+  const ph = phMatch ? encodeURIComponent(phMatch[1]) : "";
+  const path = ph ? `/usage/token-plan/list?api-platform_ph=${ph}` : "/usage/token-plan/list";
+
   return request<DailyUsage[]>(
-    "/usage/token-plan/list",
+    path,
     cookie,
     { method: "POST", body: { year, month } }
   );

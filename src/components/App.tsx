@@ -8,13 +8,15 @@ import ModelView from "./ModelView.js";
 interface Props {
   cookie: string;
   refreshInterval: number;
+  showDaily?: boolean;
+  showModel?: boolean;
 }
 
-export default function App({ cookie, refreshInterval }: Props) {
-  const { planUsage, planDetail, dailyUsage, loading, error, lastRefresh, refresh } =
+export default function App({ cookie, refreshInterval, showDaily: initDaily = false, showModel: initModel = false }: Props) {
+  const { planUsage, planDetail, dailyUsage, loading, error, refresh } =
     useStore(cookie, refreshInterval);
-  const [showDaily, setShowDaily] = useState(false);
-  const [showModel, setShowModel] = useState(false);
+  const [showDaily, setShowDaily] = useState(initDaily);
+  const [showModel, setShowModel] = useState(initModel);
   const { exit } = useApp();
 
   useInput((input, key) => {

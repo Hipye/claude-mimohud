@@ -13,8 +13,10 @@ const cli = meow(
   Options
     --configure, -c  Set up cookie configuration
     --interval, -i   Refresh interval in minutes (default: 5)
+    --daily, -d      Show daily usage view
+    --model, -m      Show model statistics view
 
-  Keyboard shortcuts
+  Keyboard shortcuts (interactive mode only)
     d  Toggle daily usage view
     m  Toggle model statistics view
     r  Force refresh
@@ -25,6 +27,8 @@ const cli = meow(
     flags: {
       configure: { type: "boolean", shortFlag: "c" },
       interval: { type: "number", shortFlag: "i" },
+      daily: { type: "boolean", shortFlag: "d" },
+      model: { type: "boolean", shortFlag: "m" },
     },
   }
 );
@@ -53,4 +57,11 @@ if (!config.cookie) {
 
 const refreshInterval = cli.flags.interval ?? config.refreshInterval;
 
-render(<App cookie={config.cookie} refreshInterval={refreshInterval} />);
+render(
+  <App
+    cookie={config.cookie}
+    refreshInterval={refreshInterval}
+    showDaily={cli.flags.daily}
+    showModel={cli.flags.model}
+  />
+);
