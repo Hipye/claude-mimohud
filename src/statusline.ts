@@ -76,11 +76,13 @@ async function main() {
   }
 
   const { planUsage: u, planDetail: d } = data;
-  const planBar = progressBar(u.planPercent);
-  const compBar = progressBar(u.compensationPercent);
+  const planPct = u.planLimit > 0 ? (u.planUsed / u.planLimit) * 100 : 0;
+  const compPct = u.compensationLimit > 0 ? (u.compensationUsed / u.compensationLimit) * 100 : 0;
+  const planBar = progressBar(planPct);
+  const compBar = progressBar(compPct);
   const output = [
-    `MiMo 套餐 ${planBar} ${u.planPercent.toFixed(1)}% ${formatTokens(u.planUsed)}/${formatTokens(u.planLimit)}`,
-    `补偿 ${compBar} ${u.compensationPercent.toFixed(1)}% ${formatTokens(u.compensationUsed)}/${formatTokens(u.compensationLimit)}`,
+    `MiMo 套餐 ${planBar} ${planPct.toFixed(1)}% ${formatTokens(u.planUsed)}/${formatTokens(u.planLimit)}`,
+    `补偿 ${compBar} ${compPct.toFixed(1)}% ${formatTokens(u.compensationUsed)}/${formatTokens(u.compensationLimit)}`,
     d.planName,
     `${d.periodEnd}到期`,
     `续费${d.autoRenew ? "✓" : "✗"}`,
