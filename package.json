@@ -1,6 +1,6 @@
 {
   "name": "claude-mimohud",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Terminal HUD for Xiaomi MiMo token usage",
   "type": "module",
   "bin": {
