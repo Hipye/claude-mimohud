@@ -62,14 +62,14 @@ async function main() {
 
   let data = readCache();
   if (!data) {
-    try {
-      const [planUsage, planDetail] = await Promise.all([
-        fetchPlanUsage(config.cookie),
-        fetchPlanDetail(config.cookie),
-      ]);
-      data = { timestamp: Date.now(), planUsage, planDetail };
+    const results = await Promise.allSettled([
+      fetchPlanUsage(config.cookie),
+      fetchPlanDetail(config.cookie),
+    ]);
+    if (results[0].status === "fulfilled" && results[1].status === "fulfilled") {
+      data = { timestamp: Date.now(), planUsage: results[0].value, planDetail: results[1].value };
       writeCache(data);
-    } catch {
+    } else {
       console.log("MiMo: \x1b[31m获取失败\x1b[0m");
       return;
     }

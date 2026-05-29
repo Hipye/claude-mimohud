@@ -1,12 +1,6 @@
 import { loadConfig } from "./config.js";
 import { fetchPlanUsage, fetchPlanDetail, fetchDailyUsage } from "./api.js";
-
-function formatTokens(n: number): string {
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-}
+import { formatTokens, aggregateDailyByDate, aggregateByModel } from "./utils.js";
 
 function progressBar(percent: number, width = 10): string {
   const filled = Math.round((percent / 100) * width);
@@ -63,11 +57,7 @@ async function main() {
     console.log(`套餐额度 ${planBar} ${usage.planPercent.toFixed(1)}% ${formatTokens(usage.planUsed)}/${formatTokens(usage.planLimit)} | 补偿积分 ${compBar} ${usage.compensationPercent.toFixed(1)}% ${formatTokens(usage.compensationUsed)}/${formatTokens(usage.compensationLimit)} | ${detail.planName} | ${detail.periodEnd}到期 | 续费${detail.autoRenew ? "✓" : "✗"}`);
 
     // Daily usage
-    const byDate = new Map<string, number>();
-    for (const item of daily) {
-      byDate.set(item.date, (byDate.get(item.date) ?? 0) + item.totalToken);
-    }
-    const sorted = [...byDate.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
+    const sorted = aggregateDailyByDate(daily, 5);
     const maxTokens = Math.max(...sorted.map(([, v]) => v), 1);
 
     console.log("\n最近 5 天消耗:");
@@ -79,30 +69,12 @@ async function main() {
     }
 
     // Model stats
-    const agg = new Map<string, { model: string; totalToken: number; requestCount: number; hitToken: number; missToken: number }>();
-    for (const item of daily) {
-      const existing = agg.get(item.model);
-      if (existing) {
-        existing.totalToken += item.totalToken;
-        existing.requestCount += item.requestCount;
-        existing.hitToken += item.inputHitToken;
-        existing.missToken += item.inputMissToken;
-      } else {
-        agg.set(item.model, {
-          model: item.model,
-          totalToken: item.totalToken,
-          requestCount: item.requestCount,
-          hitToken: item.inputHitToken,
-          missToken: item.inputMissToken,
-        });
-      }
-    }
-    const models = [...agg.values()].sort((a, b) => b.totalToken - a.totalToken);
+    const models = aggregateByModel(daily);
 
     console.log("\n模型统计:");
     for (const m of models) {
-      const totalInput = m.hitToken + m.missToken;
-      const hitRate = totalInput > 0 ? Math.round((m.hitToken / totalInput) * 100) : 0;
+      const totalInput = m.inputHitToken + m.inputMissToken;
+      const hitRate = totalInput > 0 ? Math.round((m.inputHitToken / totalInput) * 100) : 0;
       console.log(`  ${m.model.padEnd(14)} ${formatTokens(m.totalToken).padStart(12)}   ${String(m.requestCount).padStart(6)} req   ${hitRate}% cache`);
     }
 

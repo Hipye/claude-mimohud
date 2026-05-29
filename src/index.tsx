@@ -15,6 +15,7 @@ const cli = meow(
     --interval, -i   Refresh interval in minutes (default: 5)
     --daily, -d      Show daily usage view
     --model, -m      Show model statistics view
+    --all, -a        Show all views (daily + model)
 
   Keyboard shortcuts (interactive mode only)
     d  Toggle daily usage view
@@ -29,6 +30,7 @@ const cli = meow(
       interval: { type: "number", shortFlag: "i" },
       daily: { type: "boolean", shortFlag: "d" },
       model: { type: "boolean", shortFlag: "m" },
+      all: { type: "boolean", shortFlag: "a" },
     },
   }
 );
@@ -43,10 +45,11 @@ if (cli.flags.configure) {
   console.log("2. Open DevTools (F12) → Network tab");
   console.log("3. Refresh the page, click any API request");
   console.log("4. Copy the Cookie header value");
-  console.log(`5. Paste it into ${getConfigPath()} as the "cookie" field`);
+  console.log(`5. Paste the raw Cookie string into ${getConfigPath()}`);
   console.log("");
-  console.log("Example:");
-  console.log(JSON.stringify({ cookie: "api-platform_serviceToken=...; userId=...", refreshInterval: 5 }, null, 2));
+  console.log("Supports raw browser Cookie directly (URL-encoded, quoted values auto-converted).");
+  console.log("Example file content:");
+  console.log('  api-platform_serviceToken=xxx; userId=123; api-platform_slh=xxx; api-platform_ph=xxx');
   process.exit(0);
 }
 
@@ -55,13 +58,15 @@ if (!config.cookie) {
   process.exit(1);
 }
 
-const refreshInterval = cli.flags.interval ?? config.refreshInterval;
+const refreshInterval = Math.max(1, cli.flags.interval ?? config.refreshInterval);
+
+const showAll = cli.flags.all;
 
 render(
   <App
     cookie={config.cookie}
     refreshInterval={refreshInterval}
-    showDaily={cli.flags.daily}
-    showModel={cli.flags.model}
+    showDaily={showAll || cli.flags.daily}
+    showModel={showAll || cli.flags.model}
   />
 );

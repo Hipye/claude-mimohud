@@ -30,23 +30,40 @@ async function request<T>(
   cookie: string,
   options?: { method?: string; body?: unknown }
 ): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: options?.method ?? "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: cookie,
-      "x-timezone": "Asia/Shanghai",
-    },
-    body: options?.body ? JSON.stringify(options.body) : undefined,
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: options?.method ?? "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+        "x-timezone": "Asia/Shanghai",
+      },
+      body: options?.body ? JSON.stringify(options.body) : undefined,
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+    let json: { code: number; message: string; data: T };
+    try {
+      json = (await res.json()) as { code: number; message: string; data: T };
+    } catch {
+      throw new Error("服务器返回了无法解析的响应");
+    }
+    if (json.code !== 0) {
+      throw new Error(`API error: ${json.message}`);
+    }
+    return json.data;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("请求超时，请检查网络连接");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-  const json = (await res.json()) as { code: number; message: string; data: T };
-  if (json.code !== 0) {
-    throw new Error(`API error: ${json.message}`);
-  }
-  return json.data;
 }
 
 export async function fetchPlanUsage(cookie: string): Promise<PlanUsage> {
@@ -56,8 +73,9 @@ export async function fetchPlanUsage(cookie: string): Promise<PlanUsage> {
     };
   }>("/tokenPlan/usage", cookie);
 
-  const plan = data.usage.items.find((i) => i.name === "plan_total_token");
-  const comp = data.usage.items.find(
+  const items = data.usage?.items ?? [];
+  const plan = items.find((i) => i.name === "plan_total_token");
+  const comp = items.find(
     (i) => i.name === "compensation_total_token"
   );
 
@@ -79,9 +97,9 @@ export async function fetchPlanDetail(cookie: string): Promise<PlanDetail> {
   }>("/tokenPlan/detail", cookie);
 
   return {
-    planName: data.planName,
-    periodEnd: data.currentPeriodEnd.split(" ")[0],
-    autoRenew: data.hasAutoRenewSubscribed,
+    planName: data.planName ?? "未知套餐",
+    periodEnd: data.currentPeriodEnd ? data.currentPeriodEnd.split(" ")[0] : "未知",
+    autoRenew: data.hasAutoRenewSubscribed ?? false,
   };
 }
 
@@ -95,9 +113,10 @@ export async function fetchDailyUsage(
   const ph = phMatch ? encodeURIComponent(phMatch[1]) : "";
   const path = ph ? `/usage/token-plan/list?api-platform_ph=${ph}` : "/usage/token-plan/list";
 
-  return request<DailyUsage[]>(
+  const data = await request<DailyUsage[]>(
     path,
     cookie,
     { method: "POST", body: { year, month } }
   );
+  return Array.isArray(data) ? data : [];
 }
