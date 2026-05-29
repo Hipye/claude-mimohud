@@ -1,15 +1,16 @@
 {
-  "name": "mimo-hud",
+  "name": "claude-mimohud",
   "version": "1.0.0",
   "description": "Terminal HUD for Xiaomi MiMo token usage",
   "type": "module",
   "bin": {
-    "mimo-hud": "./dist/index.js"
+    "claude-mimohud": "./dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/index.tsx",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "start:statusline": "node dist/statusline.js"
   },
   "dependencies": {
     "chalk": "^5.3.0",

@@ -1,0 +1,15 @@
+{
+  "name": "claude-mimohud",
+  "owner": {
+    "name": "Moriz"
+  },
+  "plugins": [
+    {
+      "name": "claude-mimohud",
+      "source": "./",
+      "description": "小米 MiMo 平台 token 用量监控",
+      "category": "monitoring",
+      "tags": ["mimo", "statusline", "monitoring"]
+    }
+  ]
+}

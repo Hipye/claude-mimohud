@@ -1,0 +1,10 @@
+{
+  "name": "claude-mimohud",
+  "version": "1.0.0",
+  "description": "小米 MiMo 平台 token 用量监控 - Claude Code 状态栏插件",
+  "author": {
+    "name": "Moriz"
+  },
+  "license": "MIT",
+  "keywords": ["mimo", "xiaomi", "token-usage", "statusline", "monitoring"]
+}
