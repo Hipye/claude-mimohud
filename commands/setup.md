@@ -28,6 +28,14 @@ echo '{"cookie":"$ARGUMENTS","refreshInterval":5}' > ~/.mimo-hud.json
 echo '{"cookie":"粘贴的cookie值","refreshInterval":5}' > ~/.mimo-hud.json
 ```
 
+## 构建插件
+
+每次执行 setup 都重新构建，确保 dist 与源码同步：
+
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}" && npm install && npm run build
+```
+
 ## 配置 statusLine
 
 配置完成后，将 statusLine 添加到 Claude Code 设置中。运行以下命令自动完成：
