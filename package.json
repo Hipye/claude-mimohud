@@ -1,6 +1,6 @@
 {
   "name": "claude-mimohud",
-  "version": "1.1.5",
+  "version": "1.1.8",
   "description": "Terminal HUD for Xiaomi MiMo token usage",
   "type": "module",
   "bin": {
@@ -10,7 +10,8 @@
     "dev": "tsx src/index.tsx",
     "build": "tsc",
     "start": "node dist/index.js",
-    "start:statusline": "node dist/statusline.js"
+    "start:statusline": "node dist/statusline.js",
+    "refresh-cookie": "tsx scripts/refresh-cookie.ts"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^25.9.1",
     "@types/react": "^18.2.0",
+    "puppeteer": "^24.0.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.0"
   },

@@ -13,6 +13,7 @@ mimo-hud 是一个终端 HUD 工具，用于实时显示小米 MiMo 平台的 to
 | `npm run dev` | 开发模式运行（tsx 直接执行 src/index.tsx） |
 | `npm run build` | TypeScript 编译到 dist/ |
 | `npm start` | 运行编译后的 dist/index.js |
+| `npm run refresh-cookie` | 手动刷新 Cookie（浏览器自动打开，需登录） |
 
 无测试、无 linter 配置。项目无 README。
 
@@ -87,3 +88,22 @@ ERROR Raw mode is not supported on the current process.stdin
 Ink 的 `useInput` 要求交互式终端。解决方案：
 - 在真实终端窗口中运行 `npm run dev`
 - 非交互场景使用 `npx tsx src/test-run.ts`
+
+### 自动刷新 Cookie
+
+系统会自动检测 Cookie 过期（HTTP 401），并触发刷新：
+
+1. 检测到 401 → 自动运行 `refresh-cookie`
+2. 浏览器弹出 → 手动登录
+3. 登录成功 → 自动提取 Cookie 并重试
+
+**手动刷新**：
+```bash
+npm run refresh-cookie
+```
+
+**原理**：通过 Chrome DevTools Protocol 获取 httpOnly Cookie，无需手动复制。
+
+**注意**：
+- `api-platform_serviceToken` 有效期约 24 小时
+- 浏览器会记住登录态，后续刷新通常无需重新登录

@@ -10,6 +10,16 @@ interface Props {
   dailyUsage: DailyUsage[];
 }
 
+function getRemainingTime(periodEnd: string): string {
+  const now = new Date();
+  const endDate = new Date(periodEnd + "T23:59:59");
+  const diffMs = endDate.getTime() - now.getTime();
+  if (diffMs <= 0) return chalk.red("已到期");
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  return `剩余 ${chalk.white(`${days}天${hours}时`)}`;
+}
+
 export default function HudLine({ usage, detail, dailyUsage }: Props) {
   const planPercent = usage.planLimit > 0 ? (usage.planUsed / usage.planLimit) * 100 : 0;
   const planBar = progressBar(usage.planUsed, usage.planLimit);
@@ -31,12 +41,12 @@ export default function HudLine({ usage, detail, dailyUsage }: Props) {
           const totalInput = m.inputHitToken + m.inputMissToken;
           const hitRate = totalInput > 0 ? Math.round((m.inputHitToken / totalInput) * 100) : 0;
           const shortName = m.model.replace(/^mimo-/, "");
-          return `${chalk.hex("#eb7d16").bgHex("#ffefe0")(shortName)} ${formatTokens(m.totalToken)} ${m.requestCount}req ${hitRate}%cache`;
+          return `${chalk.hex("#eb7d16")(shortName)} ${chalk.white(`${formatTokens(m.totalToken)} ${m.requestCount}req ${hitRate}%cache`)}`;
         })
         .join(" && ")
     : null;
 
-  const detailStr = `${detail.periodEnd}到期`;
+  const detailStr = getRemainingTime(detail.periodEnd);
 
   return (
     <Text>
